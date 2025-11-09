@@ -27,7 +27,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://zerodha-clone-frontend-08fo.onrender.com",
     credentials: true,
   })
 );
