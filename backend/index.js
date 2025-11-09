@@ -19,7 +19,7 @@ const User = require("./model/UserModel");
 const AuthRoutes = require("./routes/AuthRoutes");
 
 const PORT = process.env.PORT || 3001;
-const uri = process.env.MONGO_URL;
+const uri = process.env.MONGO_URI;
 
 const app = express();
 
