@@ -14,7 +14,6 @@ const { OrdersModel } = require("./model/OrdersModel");
 
 const User = require("./model/UserModel");
 
-
 // Routes
 const AuthRoutes = require("./routes/AuthRoutes");
 
@@ -22,8 +21,9 @@ const PORT = process.env.PORT || 3001;
 const uri = process.env.MONGO_URI;
 
 const app = express();
+app.set("trust proxy", 1);
 
-// ✅ MIDDLEWARE
+// Middleware
 app.use(bodyParser.json());
 app.use(
   cors({
@@ -31,9 +31,16 @@ app.use(
     credentials: true,
   })
 );
+app.options(
+  "*",
+  cors({
+    origin: "https://zerodha-clone-frontend-08fo.onrender.com",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 
-// ✅ SIGNUP ROUTE
+// Signup
 app.post("/api/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -56,7 +63,7 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-// ✅ LOGIN ROUTE (JWT)
+// Login
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -75,8 +82,8 @@ app.post("/api/login", async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
     });
 
     res.json({ message: "Login successful!", user });
@@ -85,13 +92,13 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ✅ LOGOUT ROUTE
+// Logout
 app.post("/api/logout", (req, res) => {
   res.clearCookie("token");
   res.json({ message: "Logged out successfully" });
 });
 
-// ✅ AUTH MIDDLEWARE
+// Auth middleware
 function authMiddleware(req, res, next) {
   const token = req.cookies.token;
   if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -105,12 +112,12 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// ✅ PROTECTED ROUTE
+// Protected route
 app.get("/api/me", authMiddleware, (req, res) => {
   res.json({ message: "Authorized", user: req.user });
 });
 
-// ✅ DB CONNECT
+// DB connect
 mongoose
   .connect(uri)
   .then(() => {
@@ -119,30 +126,30 @@ mongoose
   })
   .catch((err) => console.log("❌ MongoDB error:", err));
 
-// ✅ HEALTH CHECK
+// Health check
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
 });
 
-// ✅ HOLDINGS
+// Holdings
 app.get("/allHoldings", async (req, res) => {
   const data = await HoldingsModel.find({});
   res.json(data);
 });
 
-// ✅ POSITIONS
+// Positions
 app.get("/allPositions", async (req, res) => {
   const data = await PositionsModel.find({});
   res.json(data);
 });
 
-// ✅ ORDERS
+// Orders
 app.get("/allOrders", async (req, res) => {
   const data = await OrdersModel.find({});
   res.json(data);
 });
 
-// ✅ CREATE ORDER
+// Create order
 app.post("/newOrder", async (req, res) => {
   try {
     const { name, qty, price, mode } = req.body;
