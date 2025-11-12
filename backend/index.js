@@ -32,7 +32,7 @@ app.use(
   })
 );
 app.options(
-  "*",
+  "/",
   cors({
     origin: "https://zerodha-clone-frontend-08fo.onrender.com",
     credentials: true,
