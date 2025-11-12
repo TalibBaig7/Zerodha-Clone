@@ -35,7 +35,7 @@ app.use(
 );
 
 app.options(
-  /(.*)/,
+  /.*/,
   cors({
     origin: [
       "https://zerodha-clone-frontend-08fo.onrender.com",
@@ -44,7 +44,6 @@ app.options(
     credentials: true,
   })
 );
-
 
 // Signup
 app.post("/api/signup", async (req, res) => {
