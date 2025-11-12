@@ -24,21 +24,26 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Middleware
-app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "https://zerodha-clone-frontend-08fo.onrender.com",
+    origin: [
+      "https://zerodha-clone-frontend-08fo.onrender.com",
+      "https://zerodha-clone-dashboard-vd6u.onrender.com",
+    ],
     credentials: true,
   })
 );
+
 app.options(
-  "/",
+  "/*",
   cors({
-    origin: "https://zerodha-clone-frontend-08fo.onrender.com",
+    origin: [
+      "https://zerodha-clone-frontend-08fo.onrender.com",
+      "https://zerodha-clone-dashboard-vd6u.onrender.com",
+    ],
     credentials: true,
   })
 );
-app.use(cookieParser());
 
 // Signup
 app.post("/api/signup", async (req, res) => {
