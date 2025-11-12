@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./index.css";
 import Home from "./components/Home";
+const API = process.env.REACT_APP_API_URL;
+export default API;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -14,3 +16,4 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
