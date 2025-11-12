@@ -41,16 +41,17 @@ const SellActionWindow = ({ uid }) => {
 
       console.log("Sending SELL order:", orderData);
 
-      const response = await axios.post(
-        "https://zerodha-clone-backend-ax9w.onrender.com/newOrder",
-        orderData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          timeout: 10000,
-        }
-      );
+   const response = await axios.post(
+     "https://zerodha-clone-backend-ax9w.onrender.com/newOrder",
+     orderData,
+     {
+       headers: {
+         "Content-Type": "application/json",
+       },
+       withCredentials: true, // 🔥 ADD THIS LINE
+     }
+   );
+
 
       console.log("SELL order successful:", response.data);
       alert("SELL order placed successfully!");
