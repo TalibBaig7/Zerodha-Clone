@@ -44,13 +44,13 @@ const BuyActionWindow = ({ uid }) => {
       console.log("Sending order:", orderData);
 
       const response = await axios.post(
-        "http://localhost:3002/newOrder",
+        "https://zerodha-clone-backend-ax9w.onrender.com/newOrder",
         orderData,
         {
           headers: {
             "Content-Type": "application/json",
           },
-          timeout: 10000, // 10 second timeout
+          timeout: 10000,
         }
       );
 

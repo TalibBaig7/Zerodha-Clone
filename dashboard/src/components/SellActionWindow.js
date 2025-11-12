@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import GeneralContext from "./GeneralContext";
-import "./BuyActionWindow.css"; // Reuse the same CSS
+import "./BuyActionWindow.css";
 
 const SellActionWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
@@ -9,13 +9,11 @@ const SellActionWindow = ({ uid }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSellClick = async (e) => {
-    // Prevent any default behavior
     e.preventDefault();
     e.stopPropagation();
 
     console.log("Sell button clicked!");
-    
-    // Validation
+
     if (!uid) {
       alert("Error: Stock symbol is required!");
       return;
@@ -34,46 +32,54 @@ const SellActionWindow = ({ uid }) => {
     setIsLoading(true);
 
     try {
-      // IMPORTANT: Notice mode is "SELL" instead of "BUY"
       const orderData = {
         name: uid,
         qty: Number(stockQuantity),
         price: Number(stockPrice),
-        mode: "SELL", // THIS IS THE KEY DIFFERENCE
+        mode: "SELL",
       };
 
       console.log("Sending SELL order:", orderData);
 
-      const response = await axios.post("http://localhost:3002/newOrder", orderData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      });
+      const response = await axios.post(
+        "https://zerodha-clone-backend-ax9w.onrender.com/newOrder",
+        orderData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          timeout: 10000,
+        }
+      );
 
       console.log("SELL order successful:", response.data);
       alert("SELL order placed successfully!");
-      
-      // Close the sell window
-      if (GeneralContext && typeof GeneralContext.closeSellWindow === 'function') {
+
+      if (
+        GeneralContext &&
+        typeof GeneralContext.closeSellWindow === "function"
+      ) {
         GeneralContext.closeSellWindow();
-      } else if (GeneralContext && typeof GeneralContext.closeBuyWindow === 'function') {
-        // Fallback if you're using the same close function
+      } else if (
+        GeneralContext &&
+        typeof GeneralContext.closeBuyWindow === "function"
+      ) {
         GeneralContext.closeBuyWindow();
       }
-
     } catch (error) {
       console.error("SELL order failed:", error);
-      
+
       let errorMessage = "Failed to place SELL order. ";
       if (error.response) {
-        errorMessage += `Server error: ${error.response.data?.error || error.response.statusText}`;
+        errorMessage += `Server error: ${
+          error.response.data?.error || error.response.statusText
+        }`;
       } else if (error.request) {
         errorMessage += "No response from server. Check if backend is running.";
       } else {
         errorMessage += error.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setIsLoading(false);
@@ -83,11 +89,16 @@ const SellActionWindow = ({ uid }) => {
   const handleCancelClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (GeneralContext && typeof GeneralContext.closeSellWindow === 'function') {
+
+    if (
+      GeneralContext &&
+      typeof GeneralContext.closeSellWindow === "function"
+    ) {
       GeneralContext.closeSellWindow();
-    } else if (GeneralContext && typeof GeneralContext.closeBuyWindow === 'function') {
-      // Fallback if you're using the same close function
+    } else if (
+      GeneralContext &&
+      typeof GeneralContext.closeBuyWindow === "function"
+    ) {
       GeneralContext.closeBuyWindow();
     }
   };
@@ -126,25 +137,25 @@ const SellActionWindow = ({ uid }) => {
       <div className="buttons">
         <span>Margin required ₹140.65</span>
         <div>
-          <button 
-            className={`btn btn-red ${isLoading ? 'loading' : ''}`} // Changed to red for sell
+          <button
+            className={`btn btn-red ${isLoading ? "loading" : ""}`}
             onClick={handleSellClick}
             type="button"
             disabled={isLoading}
-            style={{ 
-              pointerEvents: 'auto', 
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              backgroundColor: '#e53e3e' // Red color for sell button
+            style={{
+              pointerEvents: "auto",
+              cursor: isLoading ? "not-allowed" : "pointer",
+              backgroundColor: "#e53e3e",
             }}
           >
-            {isLoading ? 'Processing...' : 'Sell'}
+            {isLoading ? "Processing..." : "Sell"}
           </button>
-          <button 
+          <button
             className="btn btn-grey"
             onClick={handleCancelClick}
             type="button"
             disabled={isLoading}
-            style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+            style={{ pointerEvents: "auto", cursor: "pointer" }}
           >
             Cancel
           </button>
