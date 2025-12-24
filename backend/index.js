@@ -23,7 +23,7 @@ const uri = process.env.MONGO_URI;
 const app = express();
 app.set("trust proxy", 1);
 
-// Middleware
+// Middleware - CORS
 app.use(
   cors({
     origin: [
@@ -44,6 +44,11 @@ app.options(
     credentials: true,
   })
 );
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Signup
 app.post("/api/signup", async (req, res) => {
@@ -122,15 +127,6 @@ app.get("/api/me", authMiddleware, (req, res) => {
   res.json({ message: "Authorized", user: req.user });
 });
 
-// DB connect
-mongoose
-  .connect(uri)
-  .then(() => {
-    console.log("✅ DB connected!");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => console.log("❌ MongoDB error:", err));
-
 // Health check
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
@@ -138,28 +134,53 @@ app.get("/", (req, res) => {
 
 // Holdings
 app.get("/allHoldings", async (req, res) => {
-  const data = await HoldingsModel.find({});
-  res.json(data);
+  try {
+    const data = await HoldingsModel.find({});
+    res.json(data);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching holdings", details: error.message });
+  }
 });
 
 // Positions
 app.get("/allPositions", async (req, res) => {
-  const data = await PositionsModel.find({});
-  res.json(data);
+  try {
+    const data = await PositionsModel.find({});
+    res.json(data);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching positions", details: error.message });
+  }
 });
 
 // Orders
 app.get("/allOrders", async (req, res) => {
-  const data = await OrdersModel.find({});
-  res.json(data);
+  try {
+    const data = await OrdersModel.find({});
+    res.json(data);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching orders", details: error.message });
+  }
 });
 
 // Create order
 app.post("/newOrder", async (req, res) => {
   try {
+    console.log("Received order request:", req.body); // Debug log
+
     const { name, qty, price, mode } = req.body;
-    if (!name || !qty || !price || !mode)
-      return res.status(400).json({ error: "Missing fields" });
+
+    if (!name || !qty || !price || !mode) {
+      return res.status(400).json({
+        error: "Missing fields",
+        received: { name, qty, price, mode },
+      });
+    }
 
     const order = await OrdersModel.create({
       name,
@@ -168,10 +189,23 @@ app.post("/newOrder", async (req, res) => {
       mode,
     });
 
-    res.json({ message: "Order created", order });
+    res.json({ message: "Order created successfully", order });
   } catch (error) {
-    res.status(500).json({ error: "Error", details: error.message });
+    console.error("Order creation error:", error);
+    res
+      .status(500)
+      .json({ error: "Error creating order", details: error.message });
   }
 });
 
+// Routes
 app.use("/auth", AuthRoutes);
+
+// DB connect and start server
+mongoose
+  .connect(uri)
+  .then(() => {
+    console.log("✅ DB connected!");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  })
+  .catch((err) => console.log("❌ MongoDB error:", err));
