@@ -90,10 +90,12 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax", // Changed to lax for localhost to work properly
-      secure: false, // false for localhost (http), true for production (https)
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction ? true : false,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/", // Make cookie available for all paths
     });
@@ -106,10 +108,12 @@ app.post("/api/login", async (req, res) => {
 
 // Logout
 app.post("/api/logout", (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction ? true : false,
     path: "/",
   });
   res.json({ message: "Logged out successfully" });
