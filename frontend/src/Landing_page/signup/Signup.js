@@ -32,6 +32,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
+      console.log("Attempting signup with API URL:", API_URL);
       const res = await axios.post(
         `${API_URL}/api/signup`,
         {
@@ -43,6 +44,8 @@ export default function Signup() {
           withCredentials: true,
         }
       );
+
+      console.log("Signup response:", res.data);
 
       if (res.data.message) {
         alert(res.data.message || "Signup successful!");
@@ -57,12 +60,16 @@ export default function Signup() {
 
       // Redirect to dashboard after successful signup
       const dashboardUrl = process.env.REACT_APP_DASHBOARD_URL || "https://zerodha-clone-dashboard-vd6u.onrender.com";
+      console.log("Redirecting to:", dashboardUrl);
       setTimeout(() => {
         window.location.href = dashboardUrl;
       }, 1000);
 
     } catch (err) {
-      alert(err.response?.data?.message || "Signup failed!");
+      console.error("Signup error:", err);
+      const errorMsg = err.response?.data?.message || err.message || "Signup failed!";
+      console.error("Error message:", errorMsg);
+      alert(errorMsg);
     } finally {
       setLoading(false);
     }

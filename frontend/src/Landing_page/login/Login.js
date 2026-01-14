@@ -25,6 +25,7 @@ export default function Login() {
     setLoading(true);
 
     try {
+      console.log("Attempting login with API URL:", API_URL);
       const res = await axios.post(
         `${API_URL}/api/login`,
         {
@@ -35,6 +36,8 @@ export default function Login() {
           withCredentials: true,
         }
       );
+
+      console.log("Login response:", res.data);
 
       if (res.data.message) {
         alert(res.data.message || "Login successful!");
@@ -47,11 +50,15 @@ export default function Login() {
 
       // Redirect to dashboard
       const dashboardUrl = process.env.REACT_APP_DASHBOARD_URL || "https://zerodha-clone-dashboard-vd6u.onrender.com";
+      console.log("Redirecting to:", dashboardUrl);
       setTimeout(() => {
         window.location.href = dashboardUrl;
       }, 1000);
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed!");
+      console.error("Login error:", err);
+      const errorMsg = err.response?.data?.message || err.message || "Login failed!";
+      console.error("Error message:", errorMsg);
+      alert(errorMsg);
     } finally {
       setLoading(false);
     }
