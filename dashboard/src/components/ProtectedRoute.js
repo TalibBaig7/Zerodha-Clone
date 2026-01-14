@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("Checking auth against API:", API_URL); // Debug log
       try {
         const response = await axios.get(`${API_URL}/api/me`, {
           withCredentials: true,
@@ -16,10 +17,11 @@ const ProtectedRoute = ({ children }) => {
         if (response.data.message === "Authorized") {
           setIsAuthenticated(true);
         } else {
+          console.warn("Auth check returned unauthorized:", response.data);
           redirectToLogin();
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("Auth check failed against:", API_URL, error);
         redirectToLogin();
       } finally {
         setIsLoading(false);
