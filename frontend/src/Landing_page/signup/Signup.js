@@ -56,7 +56,7 @@ export default function Signup() {
       });
 
       // Redirect to dashboard after successful signup
-      const dashboardUrl = process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3002";
+      const dashboardUrl = process.env.REACT_APP_DASHBOARD_URL || "https://zerodha-clone-dashboard-vd6u.onrender.com";
       setTimeout(() => {
         window.location.href = dashboardUrl;
       }, 1000);
