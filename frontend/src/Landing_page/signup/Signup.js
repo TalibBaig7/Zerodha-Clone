@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import API_URL from "../../config";
+import { Link } from "react-router-dom";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
