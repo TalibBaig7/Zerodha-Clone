@@ -20,6 +20,11 @@ const AuthRoutes = require("./routes/AuthRoutes");
 const PORT = process.env.PORT || 3001;
 const uri = process.env.MONGO_URI;
 
+if (!uri) {
+  console.error("❌ Error: MONGO_URI environment variable is missing!");
+  process.exit(1);
+}
+
 const app = express();
 app.set("trust proxy", 1);
 
@@ -239,4 +244,7 @@ mongoose
     console.log("✅ DB connected!");
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
-  .catch((err) => console.log("❌ MongoDB error:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
