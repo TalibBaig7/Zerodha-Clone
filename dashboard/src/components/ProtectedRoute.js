@@ -1,42 +1,58 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import API_URL from "../config";
+import React, { useState, useEffect, useCallback } from "react";
+import { api } from "../config";
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState("checking"); // checking | authorized | unauthorized | unreachable
+  const [slowLoading, setSlowLoading] = useState(false);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      console.log("Checking auth against API:", API_URL); // Debug log
-      try {
-        const response = await axios.get(`${API_URL}/api/me`, {
-          withCredentials: true,
-        });
+  const checkAuth = useCallback(async () => {
+    setStatus("checking");
+    setSlowLoading(false);
+    const slowTimer = setTimeout(() => setSlowLoading(true), 6000);
 
-        if (response.data.message === "Authorized") {
-          setIsAuthenticated(true);
-        } else {
-          console.warn("Auth check returned unauthorized:", response.data);
-          redirectToLogin();
-        }
-      } catch (error) {
-        console.error("Auth check failed against:", API_URL, error);
-        redirectToLogin();
-      } finally {
-        setIsLoading(false);
+    console.log("Checking auth against API:", api.defaults.baseURL);
+    try {
+      const response = await api.get("/api/me");
+
+      if (response.data.message === "Authorized") {
+        setStatus("authorized");
+      } else {
+        console.warn("Auth check returned unauthorized:", response.data);
+        setStatus("unauthorized");
       }
-    };
+    } catch (error) {
+      console.error("Auth check failed against:", api.defaults.baseURL, error);
 
-    checkAuth();
+      // A real 401/403 from the server means the user genuinely isn't
+      // logged in — send them to the login page.
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        setStatus("unauthorized");
+        return;
+      }
+
+      // Anything else (timeout, no response, 5xx while the free-tier
+      // backend is still waking up) is a connectivity problem, NOT proof
+      // the user is logged out. Previously this incorrectly redirected to
+      // login on every network hiccup — show a retry screen instead so a
+      // real user session isn't dropped just because the server was slow.
+      setStatus("unreachable");
+    } finally {
+      clearTimeout(slowTimer);
+    }
   }, []);
 
-  const redirectToLogin = () => {
-    // Redirect to frontend login page
-    window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
-  };
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (status === "unauthorized") {
+      window.location.href =
+        (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+    }
+  }, [status]);
+
+  if (status === "checking") {
     return (
       <div
         style={{
@@ -46,6 +62,8 @@ const ProtectedRoute = ({ children }) => {
           height: "100vh",
           flexDirection: "column",
           gap: "20px",
+          padding: "20px",
+          textAlign: "center",
         }}
       >
         <div
@@ -58,7 +76,11 @@ const ProtectedRoute = ({ children }) => {
             animation: "spin 1s linear infinite",
           }}
         />
-        <p style={{ color: "#666", fontSize: "16px" }}>Checking authentication...</p>
+        <p style={{ color: "#666", fontSize: "16px" }}>
+          {slowLoading
+            ? "Still checking — the server may be waking up from sleep (this can take up to a minute)..."
+            : "Checking authentication..."}
+        </p>
         <style>
           {`
             @keyframes spin {
@@ -71,8 +93,44 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+  if (status === "unreachable") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+          gap: "16px",
+          padding: "20px",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ color: "#333", fontSize: "16px", maxWidth: "360px" }}>
+          Couldn't reach the server. It may be waking up from sleep, or your connection may have
+          dropped.
+        </p>
+        <button
+          onClick={checkAuth}
+          style={{
+            padding: "10px 24px",
+            background: "#0d6efd",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "unauthorized") {
+    return null; // Will redirect in the effect above
   }
 
   return <>{children}</>;

@@ -1,24 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import API_URL from "../config";
+import { api } from "../config";
 import { Delete } from "@mui/icons-material";
 import "./master-responsive.css";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [status, setStatus] = useState("loading"); // loading | ready | error
+
+  const fetchOrders = useCallback(() => {
+    setStatus("loading");
+    api
+      .get("/allOrders")
+      .then((res) => {
+        setOrders(res.data);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to load orders:", err);
+        setStatus("error");
+      });
+  }, []);
 
   useEffect(() => {
-    axios.get(`${API_URL}/allOrders`).then((res) => {
-      setOrders(res.data);
-    });
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
   const handleDeleteOrder = (index) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       setOrders((prevOrders) => prevOrders.filter((_, i) => i !== index));
     }
   };
+
+  if (status === "loading") {
+    return (
+      <div className="orders">
+        <h3 className="title">Loading orders...</h3>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="orders">
+        <div className="title" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <span>Couldn't load orders. The server may be waking up from sleep.</span>
+          <button
+            onClick={fetchOrders}
+            className="btn btn-blue"
+            style={{ alignSelf: "flex-start" }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="orders">

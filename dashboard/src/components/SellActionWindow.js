@@ -1,6 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
-import API_URL from "../config";
+import { api } from "../config";
 import GeneralContext from "./GeneralContext";
 import "./BuyActionWindow.css";
 
@@ -40,12 +39,7 @@ const SellActionWindow = ({ uid }) => {
         mode: "SELL",
       };
 
-      const response = await axios.post(`${API_URL}/newOrder`, orderData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
+      const response = await api.post("/newOrder", orderData);
 
       console.log("SELL order successful:", response.data);
       alert("Sell order placed successfully!");

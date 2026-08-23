@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import API_URL from "../../config";
+import { api } from "../../config";
 import { Link } from "react-router-dom";
 
 export default function Signup() {
@@ -14,6 +13,7 @@ export default function Signup() {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [slowLoading, setSlowLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -30,20 +30,19 @@ export default function Signup() {
     }
 
     setLoading(true);
+    setSlowLoading(false);
+    // The backend runs on a free hosting tier that can spin down when idle
+    // and take up to a minute to wake back up. Let the user know what's
+    // happening instead of leaving them staring at a stuck button.
+    const slowTimer = setTimeout(() => setSlowLoading(true), 6000);
 
     try {
-      console.log("Attempting signup with API URL:", API_URL);
-      const res = await axios.post(
-        `${API_URL}/api/signup`,
-        {
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      console.log("Attempting signup with API URL:", api.defaults.baseURL);
+      const res = await api.post("/api/signup", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
       console.log("Signup response:", res.data);
 
@@ -67,11 +66,22 @@ export default function Signup() {
 
     } catch (err) {
       console.error("Signup error:", err);
-      const errorMsg = err.response?.data?.message || err.message || "Signup failed!";
+      let errorMsg;
+      if (err.code === "ECONNABORTED") {
+        errorMsg =
+          "The server is taking too long to respond. It may be waking up from sleep (free hosting) — please wait a moment and try again.";
+      } else if (!err.response) {
+        errorMsg =
+          "Couldn't reach the server. Please check your connection and try again in a moment.";
+      } else {
+        errorMsg = err.response?.data?.message || err.message || "Signup failed!";
+      }
       console.error("Error message:", errorMsg);
       alert(errorMsg);
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
+      setSlowLoading(false);
     }
   };
 
@@ -211,6 +221,13 @@ export default function Signup() {
 
           @keyframes spin {
             to { transform: rotate(360deg); }
+          }
+
+          .wake-hint {
+            text-align: center;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            color: #6c757d;
           }
 
           .signin-link {
@@ -441,12 +458,18 @@ export default function Signup() {
               {loading ? (
                 <>
                   <span className="spinner"></span>
-                  Creating Account...
+                  {slowLoading ? "Waking up server..." : "Creating Account..."}
                 </>
               ) : (
                 "Create Account"
               )}
             </button>
+
+            {slowLoading && (
+              <p className="wake-hint">
+                First request can take up to a minute — the server is waking up from sleep.
+              </p>
+            )}
           </form>
 
           {/* Sign In Link */}

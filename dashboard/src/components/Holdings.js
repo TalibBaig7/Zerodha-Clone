@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import API_URL from "../config";
+import React, { useState, useEffect, useCallback } from "react";
+import { api } from "../config";
 import { VerticalGraph } from "./VerticalGraph";
 import { Delete } from "@mui/icons-material";
 import "./master-responsive.css";
 
 const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
+  const [status, setStatus] = useState("loading"); // loading | ready | error
+
+  const fetchHoldings = useCallback(() => {
+    setStatus("loading");
+    api
+      .get("/allHoldings")
+      .then((res) => {
+        setAllHoldings(res.data);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to load holdings:", err);
+        setStatus("error");
+      });
+  }, []);
 
   useEffect(() => {
-    axios.get(`${API_URL}/allHoldings`).then((res) => {
-      setAllHoldings(res.data);
-    });
-  }, []);
+    fetchHoldings();
+  }, [fetchHoldings]);
 
   const handleDeleteHolding = (index) => {
     if (window.confirm("Are you sure you want to delete this holding?")) {
@@ -34,6 +46,25 @@ const Holdings = () => {
       },
     ],
   };
+
+  if (status === "loading") {
+    return <h3 className="title">Loading holdings...</h3>;
+  }
+
+  if (status === "error") {
+    return (
+      <div className="title" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <span>Couldn't load holdings. The server may be waking up from sleep.</span>
+        <button
+          onClick={fetchHoldings}
+          className="btn btn-blue"
+          style={{ alignSelf: "flex-start" }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>

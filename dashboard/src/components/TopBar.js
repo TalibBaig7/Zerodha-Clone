@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import API_URL from "../config";
+import { api } from "../config";
 import { Menu as MenuIcon, Close } from "@mui/icons-material";
 import "./master-responsive.css";
 
@@ -21,13 +20,7 @@ const TopBar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        `${API_URL}/api/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      await api.post("/api/logout", {});
       window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
     } catch (error) {
       console.error("Logout error:", error);
