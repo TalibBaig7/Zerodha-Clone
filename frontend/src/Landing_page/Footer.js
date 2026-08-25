@@ -11,7 +11,7 @@ function Footer() {
           </div>
           <div className="col-6 col-md-6 col-lg-2">
             <p className="fw-bold">Account</p>
-            <a href="/" className="d-block mb-2">Open an account</a>
+            <a href="/signup" className="d-block mb-2">Open an account</a>
             <a href="/" className="d-block mb-2">Minor demat account</a>
             <a href="/" className="d-block mb-2">NRI demat account</a>
             <a href="/" className="d-block mb-2">Commodity</a>
