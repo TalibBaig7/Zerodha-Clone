@@ -41,6 +41,8 @@ const Menu = ({ isMobile, mobileMenuOpen, toggleMobileMenu }) => {
   }, [isProfileDropdownOpen]);
 
   const handleLogout = async () => {
+    const frontendUrl =
+      process.env.REACT_APP_FRONTEND_URL || "https://zerodha-clone-frontend-08fo.onrender.com";
     try {
       await axios.post(
         `${API_URL}/api/logout`,
@@ -50,11 +52,11 @@ const Menu = ({ isMobile, mobileMenuOpen, toggleMobileMenu }) => {
         }
       );
       // Redirect to frontend login page
-      window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+      window.location.href = frontendUrl + "/login";
     } catch (error) {
       console.error("Logout error:", error);
       // Still redirect even if logout API call fails
-      window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+      window.location.href = frontendUrl + "/login";
     }
   };
 

@@ -19,12 +19,14 @@ const TopBar = () => {
   };
 
   const handleLogout = async () => {
+    const frontendUrl =
+      process.env.REACT_APP_FRONTEND_URL || "https://zerodha-clone-frontend-08fo.onrender.com";
     try {
       await api.post("/api/logout", {});
-      window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+      window.location.href = frontendUrl + "/login";
     } catch (error) {
       console.error("Logout error:", error);
-      window.location.href = (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+      window.location.href = frontendUrl + "/login";
     }
   };
 

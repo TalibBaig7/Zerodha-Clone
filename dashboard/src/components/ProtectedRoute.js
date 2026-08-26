@@ -48,7 +48,8 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     if (status === "unauthorized") {
       window.location.href =
-        (process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000") + "/login";
+        (process.env.REACT_APP_FRONTEND_URL || "https://zerodha-clone-frontend-08fo.onrender.com") +
+        "/login";
     }
   }, [status]);
 

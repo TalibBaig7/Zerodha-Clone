@@ -2,6 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function Navbar() {
+  const closeMenu = () => {
+    const el = document.getElementById("navbarSupportedContent");
+    if (el && el.classList.contains("show") && window.bootstrap) {
+      window.bootstrap.Collapse.getOrCreateInstance(el).hide();
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg bg-light border-bottom sticky-top">
       <div className="container p-2">
@@ -22,7 +29,7 @@ function Navbar() {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+          <ul className="navbar-nav ms-auto mb-2 mb-lg-0" onClick={closeMenu}>
             <li className="nav-item">
               <Link className="nav-link active fw-bold" to="/signup">
                 SignUp

@@ -661,6 +661,27 @@ h3.title {
   color: var(--text-dark);
 }
 
+/* Keep the name column visible while the rest of the table scrolls
+   horizontally on narrow screens — otherwise scrolling to see P&L/etc.
+   hides the one column that says which row is which. */
+.order-table th:first-child,
+.order-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-white);
+  box-shadow: 1px 0 0 0 var(--border-color);
+}
+
+.order-table th:first-child {
+  background: var(--bg-light);
+  z-index: 2;
+}
+
+.order-table tr:hover td:first-child {
+  background: #f9fafb;
+}
+
 /* Delete button styling */
 .delete-icon-btn {
   background: transparent;
